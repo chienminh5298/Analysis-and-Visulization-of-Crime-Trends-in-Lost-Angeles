@@ -1,0 +1,122 @@
+.wrapper {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    background-color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .flashLight {
+        position: absolute;
+        height: 15vw;
+        width: 15vw;
+        filter: blur(25px);
+        background-color: white;
+        border-radius: 50%;
+        z-index: 1;
+        animation: flashMove 10s linear forwards;
+        transform: translate(-50%, -50%);
+        @keyframes flashMove {
+            0% {
+                left: 70%; /* Starting from the top-left corner */
+                top: 0%;
+            }
+            10% {
+                top: 30%;
+                left: 0%;
+            }
+            30% {
+                top: 100%;
+                left: 80%;
+            }
+            40% {
+                top: 80%;
+                left: 100%;
+            }
+            70% {
+                top: 0%;
+                left: 20%;
+            }
+            75% {
+                top: 10%;
+                left: 0%;
+            }
+            90% {
+                left: 50%; /* Move to the center */
+                top: 50%;
+                height: 15vw;
+                width: 15vw;
+                border-radius: 50%;
+            }
+            95% {
+                left: 50%; /* Move to the center */
+                top: 50%;
+                height: 15vw;
+                width: 15vw;
+                border-radius: 50%;
+            }
+            100% {
+                left: 50%; /* Move to the center */
+                top: 50%;
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+            }
+        }
+    }
+    .skip {
+        position: absolute;
+        right: 5%;
+        bottom: 5%;
+        z-index: 2;
+
+        font-size: 20px;
+        border: rgb(127, 127, 127) solid 1px;
+        border-radius: 5px;
+        overflow: hidden;
+        cursor: pointer;
+        &:active {
+            transform: translate(1px, 1px);
+        }
+        &:before {
+            position: absolute;
+            content: "";
+            height: 90px;
+            width: 400px;
+            background-image: -webkit-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgba(255, 244, 84, 0.2) 50%, transparent 50%);
+            top: 0;
+            bottom: 0;
+            transform: skew(-45deg);
+            left: -450px;
+            transition: 1s;
+            animation: shine linear 4s infinite;
+        }
+
+        @keyframes shine {
+            0%,
+            100% {
+                left: -450px;
+            }
+            50% {
+                left: 450px;
+            }
+        }
+        a {
+            text-decoration: none;
+            color: rgb(127, 127, 127);
+            padding: 15px 25px;
+            display: block;
+        }
+    }
+    .content {
+        z-index: 2;
+        position: relative;
+        text-align: center;
+        ul {
+            list-style-type: none;
+            margin: unset;
+            padding: unset;
+        }
+    }
+}
