@@ -1,0 +1,60 @@
+body {
+    margin: unset;
+    p {
+        margin: unset;
+    }
+    user-select: none;
+    -webkit-user-select: none; /* For Safari */
+    -moz-user-select: none; /* For Firefox */
+    -ms-user-select: none; /* For Internet Explorer/Edge */
+}
+
+:root {
+    --clg-1: #2c3e50;
+    --clg-2: #3498db;
+    --clg-3: #bdc3c7;
+    --clg-4: #e74c3c;
+    --clg-5: #ecf0f1;
+    --clg-6: #6a8ba1;
+}
+
+.skeleton {
+    position: relative;
+    overflow: hidden;
+    border-radius: 5px;
+    opacity: 0.1;
+    margin-right: 5px;
+    min-width: 50px;
+    &::after {
+        content: "";
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(to right, gray, white 50%, gray);
+        animation: skeleton 2s infinite alternate;
+        z-index: 99;
+    }
+    &::before {
+        background-color: white;
+        content: "";
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        z-index: 99;
+    }
+}
+
+@keyframes skeleton {
+    from {
+        left: -50%;
+    }
+    to {
+        left: 100%;
+    }
+}
