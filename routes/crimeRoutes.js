@@ -157,7 +157,67 @@ router.get('/victims-sex', async (req, res) => {
   }
 });
 
+// Fetch count of victims descent for each month at {LAT} and {LON} in the year {YEAR}
+// { "month": "01", "descent_group": "Asian/Pacific Islander", "count": 20 }
+router.get('/victims-descent', async (req, res) => {
+  const { lat, lon, year } = req.query; // Extract latitude, longitude, and year from query parameters
+
+  // Validate inputs
+  if (!lat || !lon || !year) {
+    return res.status(400).json({ message: 'Latitude, longitude, and year are required' });
+  }
+
+  try {
+    const { lat_min, lat_max, lon_min, lon_max } = LatLonRange(Number(lat), Number(lon));
+
+    const result = await executeQuery(
+      `SELECT 
+        TO_CHAR(Date_Rptd, 'MM') AS month,
+        CASE 
+          WHEN Vict_Descent IN ('A', 'C', 'D', 'F', 'G', 'J', 'K', 'L', 'P', 'S', 'U', 'V', 'Z') THEN 'Asian/Pacific Islander'
+          WHEN Vict_Descent IN ('O', 'X') THEN 'Other/Unknown'
+          WHEN Vict_Descent = 'B' THEN 'Black'
+          WHEN Vict_Descent = 'H' THEN 'Hispanic/Latin/Mexican'
+          WHEN Vict_Descent = 'I' THEN 'American Indian/Alaskan Native'
+          WHEN Vict_Descent = 'W' THEN 'White'
+          ELSE 'Uncategorized'
+        END AS descent_group,
+        COUNT(*) AS count
+      FROM Victim v
+      JOIN CrimeIncident ci ON ci.DR_NO = v.DR_NO
+      WHERE ci.LAT BETWEEN :lat_min AND :lat_max
+        AND ci.LON BETWEEN :lon_min AND :lon_max
+        AND TO_CHAR(ci.Date_Rptd, 'YYYY') = :year
+      GROUP BY TO_CHAR(Date_Rptd, 'MM'), 
+               CASE 
+                 WHEN Vict_Descent IN ('A', 'C', 'D', 'F', 'G', 'J', 'K', 'L', 'P', 'S', 'U', 'V', 'Z') THEN 'Asian/Pacific Islander'
+                 WHEN Vict_Descent IN ('O', 'X') THEN 'Other/Unknown'
+                 WHEN Vict_Descent = 'B' THEN 'Black'
+                 WHEN Vict_Descent = 'H' THEN 'Hispanic/Latin/Mexican'
+                 WHEN Vict_Descent = 'I' THEN 'American Indian/Alaskan Native'
+                 WHEN Vict_Descent = 'W' THEN 'White'
+                 ELSE 'Uncategorized'
+               END
+      ORDER BY month, descent_group`,
+      { lat_min, lat_max, lon_min, lon_max, year }
+    );
+
+    // Send the query result as JSON
+    res.json({
+      message: 'Victim descent data fetched successfully!',
+      data: result.rows,
+    });
+  } catch (error) {
+    console.error('Error fetching victim data:', error);
+    res.status(500).json({
+      message: 'Failed to fetch victim data',
+      error: error.message,
+    });
+  }
+});
+
 // Fetch weapons at {LAT} and {LON}
+// [0] = January and [11] = December
 router.get('/weapons', async (req, res) => {
   const { lat, lon, year } = req.query; // Extract latitude, longitude, and year from query parameters
 
