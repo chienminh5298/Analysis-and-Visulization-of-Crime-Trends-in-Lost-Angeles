@@ -20,12 +20,11 @@ router.get('/test-connection', async (req, res) => {
 });
 
 // Fetch # of crimes per month at {LAT} and {LON} during {YEAR}
-// [0] = January and [11] = December
-router.get('/crime-count', async (req, res) => {
-  const { lat, lon, year } = req.query; // Extract latitude, longitude, and year from query parameters
-  console.log('first')
+router.get('/caseNumberTrend', async (req, res) => {
+  const { lat, lon, year } = req.query;
+
   // Validate inputs
-  if (!lat || !lon ) {
+  if (!lat || !lon || !year) {
     return res.status(400).json({ message: 'Latitude, longitude, and year are required' });
   }
 
@@ -49,14 +48,24 @@ router.get('/crime-count', async (req, res) => {
         COUNT(CASE WHEN TO_CHAR(Date_Rptd, 'MM') = '12' THEN DR_NO END) AS December
       FROM CrimeIncident
       WHERE LAT BETWEEN :lat_min AND :lat_max
-        AND LON BETWEEN :lon_min AND :lon_max`,
-      { lat_min, lat_max, lon_min, lon_max }
+        AND LON BETWEEN :lon_min AND :lon_max
+        AND TO_CHAR(Date_Rptd, 'YYYY') = :year`,
+      { lat_min, lat_max, lon_min, lon_max, year }
     );
 
-    // Send the result as JSON (single row with 12 columns for months)
+    // Combine metadata and rows to form the desired structure
+    const columns = result.metaData.map(meta => meta.name); // Get column names
+    const values = result.rows[0]; // Get the first row of values
+
+    const data = columns.map((month, index) => ({
+      month,
+      caseNums: values[index],
+    }));
+
+    // Send the formatted result as JSON
     res.json({
       message: 'Crime count data fetched successfully!',
-      data: result.rows[0], // Single row with 12 columns for months
+      data,
     });
   } catch (error) {
     console.error('Error fetching crime count data:', error);
@@ -68,8 +77,7 @@ router.get('/crime-count', async (req, res) => {
 });
 
 // Fetch count of victims age for each month at {LAT} and {LON} in the year {YEAR}
-// [0] = January and [11] = December
-router.get('/victims-age', async (req, res) => {
+router.get('/byAge', async (req, res) => {
   const { lat, lon, year } = req.query; // Extract latitude and longitude from query parameters
 
   // Validate
@@ -102,9 +110,18 @@ router.get('/victims-age', async (req, res) => {
       { lat_min, lat_max, lon_min, lon_max, year }
     );
 
+    // Restructure output
+    const columns = result.metaData.map(meta => meta.name); // Get column names
+    const values = result.rows[0]; // Get the first row of values
+
+    const data = columns.map((month, index) => ({
+      month,
+      age: values[index],
+    }));
+
     // Send the query result as JSON
     res.json({
-      data: result.rows[0], // Single row with 12 columns for months
+      data,
     });
   } catch (error) {
     console.error('Error fetching victim data:', error);
@@ -116,8 +133,7 @@ router.get('/victims-age', async (req, res) => {
 });
 
 // Fetch count of victims age for each month at {LAT} and {LON} in the year {YEAR}
-// { "month": "01", "Vict_Sex": "M", "count": 15 }
-router.get('/victims-sex', async (req, res) => {
+router.get('/byGender', async (req, res) => {
   const { lat, lon, year } = req.query; // Extract latitude and longitude from query parameters
 
   // Validate
@@ -138,14 +154,43 @@ router.get('/victims-sex', async (req, res) => {
       WHERE ci.LAT BETWEEN :lat_min AND :lat_max
         AND ci.LON BETWEEN :lon_min AND :lon_max
         AND TO_CHAR(ci.Date_Rptd, 'YYYY') = :year
+        AND Vict_Sex IS NOT NULL
       GROUP BY TO_CHAR(Date_Rptd, 'MM'), Vict_Sex
       ORDER BY TO_CHAR(Date_Rptd, 'MM'), Vict_Sex`,
       { lat_min, lat_max, lon_min, lon_max, year }
     );
 
+    const rawData = result.rows;
+
+    // Initialize array with default values for all months
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    const dataByMonth = months.map((month) => ({
+      month,
+      male: 0,
+      female: 0,
+      x: 0,
+    }));
+
+    // Process the raw data
+    rawData.forEach(([month, Vict_Sex, count]) => {
+      const monthIndex = parseInt(month, 10) - 1; // Convert '01' -> index 0
+      if (monthIndex >= 0 && monthIndex < 12) {
+        if (Vict_Sex === 'M') {
+          dataByMonth[monthIndex].male += count;
+        } else if (Vict_Sex === 'F') {
+          dataByMonth[monthIndex].female += count;
+        } else if (Vict_Sex === 'X') {
+          dataByMonth[monthIndex].x += count;
+        }
+      }
+    });
+
     // Send the query result as JSON
     res.json({
-      data: result.rows,
+      data: dataByMonth,
     });
   } catch (error) {
     console.error('Error fetching victim data:', error);
@@ -158,7 +203,7 @@ router.get('/victims-sex', async (req, res) => {
 
 // Fetch count of victims descent for each month at {LAT} and {LON} in the year {YEAR}
 // { "month": "01", "descent_group": "Asian/Pacific Islander", "count": 20 }
-router.get('/victims-descent', async (req, res) => {
+router.get('/byRace', async (req, res) => {
   const { lat, lon, year } = req.query; // Extract latitude, longitude, and year from query parameters
 
   // Validate inputs
@@ -173,13 +218,12 @@ router.get('/victims-descent', async (req, res) => {
       `SELECT 
         TO_CHAR(Date_Rptd, 'MM') AS month,
         CASE 
-          WHEN Vict_Descent IN ('A', 'C', 'D', 'F', 'G', 'J', 'K', 'L', 'P', 'S', 'U', 'V', 'Z') THEN 'Asian/Pacific Islander'
-          WHEN Vict_Descent IN ('O', 'X') THEN 'Other/Unknown'
+          WHEN Vict_Descent IN ('A', 'C', 'D', 'F', 'G', 'J', 'K', 'L', 'P', 'S', 'U', 'V', 'Z') THEN 'Asian'
           WHEN Vict_Descent = 'B' THEN 'Black'
-          WHEN Vict_Descent = 'H' THEN 'Hispanic/Latin/Mexican'
-          WHEN Vict_Descent = 'I' THEN 'American Indian/Alaskan Native'
+          WHEN Vict_Descent = 'H' THEN 'Hispanic'
+          WHEN Vict_Descent = 'I' THEN 'nativeAmerican'
           WHEN Vict_Descent = 'W' THEN 'White'
-          ELSE 'Uncategorized'
+          ELSE 'Other'
         END AS descent_group,
         COUNT(*) AS count
       FROM Victim v
@@ -189,22 +233,58 @@ router.get('/victims-descent', async (req, res) => {
         AND TO_CHAR(ci.Date_Rptd, 'YYYY') = :year
       GROUP BY TO_CHAR(Date_Rptd, 'MM'), 
                CASE 
-                 WHEN Vict_Descent IN ('A', 'C', 'D', 'F', 'G', 'J', 'K', 'L', 'P', 'S', 'U', 'V', 'Z') THEN 'Asian/Pacific Islander'
-                 WHEN Vict_Descent IN ('O', 'X') THEN 'Other/Unknown'
+                 WHEN Vict_Descent IN ('A', 'C', 'D', 'F', 'G', 'J', 'K', 'L', 'P', 'S', 'U', 'V', 'Z') THEN 'Asian'
                  WHEN Vict_Descent = 'B' THEN 'Black'
-                 WHEN Vict_Descent = 'H' THEN 'Hispanic/Latin/Mexican'
-                 WHEN Vict_Descent = 'I' THEN 'American Indian/Alaskan Native'
+                 WHEN Vict_Descent = 'H' THEN 'Hispanic'
+                 WHEN Vict_Descent = 'I' THEN 'nativeAmerican'
                  WHEN Vict_Descent = 'W' THEN 'White'
-                 ELSE 'Uncategorized'
+                 ELSE 'Other'
                END
       ORDER BY month, descent_group`,
       { lat_min, lat_max, lon_min, lon_max, year }
     );
 
+    const rawData = result.rows;
+
+    // Initialize array with default values for all months
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    const dataByMonth = months.map((month) => ({
+      month,
+      black: 0,
+      asian: 0,
+      hispanic: 0,
+      white: 0,
+      nativeAmerican: 0,
+      other: 0,
+    }));
+
+    // Process the raw data
+    rawData.forEach(([month, Vict_Descent, count]) => {
+      const monthIndex = parseInt(month, 10) - 1; // Convert '01' -> index 0
+      if (monthIndex >= 0 && monthIndex < 12) {
+        if (Vict_Descent === 'Black') {
+          dataByMonth[monthIndex].black += count;
+        } else if (Vict_Descent === 'Asian') {
+          dataByMonth[monthIndex].asian += count;
+        } else if (Vict_Descent === 'Hispanic') {
+          dataByMonth[monthIndex].hispanic += count;
+        } else if (Vict_Descent === 'White') {
+          dataByMonth[monthIndex].white += count;
+        } else if (Vict_Descent === 'nativeAmerican') {
+          dataByMonth[monthIndex].nativeAmerican += count;
+        } else if (Vict_Descent === 'Other') {
+          dataByMonth[monthIndex].other += count;
+        }
+      }
+    });
+
     // Send the query result as JSON
     res.json({
       message: 'Victim descent data fetched successfully!',
-      data: result.rows,
+      data: dataByMonth,
     });
   } catch (error) {
     console.error('Error fetching victim data:', error);
@@ -217,7 +297,7 @@ router.get('/victims-descent', async (req, res) => {
 
 // Fetch weapons at {LAT} and {LON}
 // [0] = January and [11] = December
-router.get('/weapons', async (req, res) => {
+router.get('/byWeapon', async (req, res) => {
   const { lat, lon, year } = req.query; // Extract latitude, longitude, and year from query parameters
 
   // Validate inputs
@@ -230,30 +310,44 @@ router.get('/weapons', async (req, res) => {
 
     const result = await executeQuery(
       `SELECT 
-        COUNT(CASE WHEN TO_CHAR(ci.Date_Rptd, 'MM') = '01' THEN ci.DR_NO END) AS January,
-        COUNT(CASE WHEN TO_CHAR(ci.Date_Rptd, 'MM') = '02' THEN ci.DR_NO END) AS February,
-        COUNT(CASE WHEN TO_CHAR(ci.Date_Rptd, 'MM') = '03' THEN ci.DR_NO END) AS March,
-        COUNT(CASE WHEN TO_CHAR(ci.Date_Rptd, 'MM') = '04' THEN ci.DR_NO END) AS April,
-        COUNT(CASE WHEN TO_CHAR(ci.Date_Rptd, 'MM') = '05' THEN ci.DR_NO END) AS May,
-        COUNT(CASE WHEN TO_CHAR(ci.Date_Rptd, 'MM') = '06' THEN ci.DR_NO END) AS June,
-        COUNT(CASE WHEN TO_CHAR(ci.Date_Rptd, 'MM') = '07' THEN ci.DR_NO END) AS July,
-        COUNT(CASE WHEN TO_CHAR(ci.Date_Rptd, 'MM') = '08' THEN ci.DR_NO END) AS August,
-        COUNT(CASE WHEN TO_CHAR(ci.Date_Rptd, 'MM') = '09' THEN ci.DR_NO END) AS September,
-        COUNT(CASE WHEN TO_CHAR(ci.Date_Rptd, 'MM') = '10' THEN ci.DR_NO END) AS October,
-        COUNT(CASE WHEN TO_CHAR(ci.Date_Rptd, 'MM') = '11' THEN ci.DR_NO END) AS November,
-        COUNT(CASE WHEN TO_CHAR(ci.Date_Rptd, 'MM') = '12' THEN ci.DR_NO END) AS December
+        TO_CHAR(ci.Date_Rptd, 'MM') AS month,
+        COUNT(CASE WHEN w.Weapon_Used_Cd IS NOT NULL THEN ci.DR_NO END) AS weapons_count,
+        COUNT(CASE WHEN w.Weapon_Used_Cd IS NULL THEN ci.DR_NO END) AS no_weapons_count
       FROM Incident_Weapon w
       JOIN CrimeIncident ci ON ci.DR_NO = w.DR_NO
       WHERE ci.LAT BETWEEN :lat_min AND :lat_max
         AND ci.LON BETWEEN :lon_min AND :lon_max
         AND TO_CHAR(ci.Date_Rptd, 'YYYY') = :year
-        AND w.Weapon_Used_Cd IS NOT NULL`,
+      GROUP BY TO_CHAR(ci.Date_Rptd, 'MM')
+      ORDER BY TO_CHAR(ci.Date_Rptd, 'MM')`,
       { lat_min, lat_max, lon_min, lon_max, year }
     );
 
+    const rawData = result.rows;
+
+    // Initialize array with default values for all months
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    const dataByMonth = months.map((month) => ({
+      month,
+      weapon: 0,
+      noWeapon: 0,
+    }));
+
+    // Process the raw data
+    rawData.forEach(([month, weapons_count, no_weapons_count]) => {
+      const monthIndex = parseInt(month, 10) - 1; // Convert '01' -> index 0
+      if (monthIndex >= 0 && monthIndex < 12) {
+        dataByMonth[monthIndex].weapon += weapons_count;
+        dataByMonth[monthIndex].noWeapon += no_weapons_count;
+      }
+    });
+
     // Send the query result as JSON
     res.json({
-      data: result.rows[0], // Single row with 12 columns for months,
+      data: dataByMonth, // Array of rows, each containing 'month', 'weapons_count', and 'no_weapons_count'
     });
   } catch (error) {
     console.error('Error fetching weapon data:', error);
