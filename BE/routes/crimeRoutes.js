@@ -23,9 +23,9 @@ router.get('/test-connection', async (req, res) => {
 // [0] = January and [11] = December
 router.get('/crime-count', async (req, res) => {
   const { lat, lon, year } = req.query; // Extract latitude, longitude, and year from query parameters
-
+  console.log('first')
   // Validate inputs
-  if (!lat || !lon || !year) {
+  if (!lat || !lon ) {
     return res.status(400).json({ message: 'Latitude, longitude, and year are required' });
   }
 
@@ -49,9 +49,8 @@ router.get('/crime-count', async (req, res) => {
         COUNT(CASE WHEN TO_CHAR(Date_Rptd, 'MM') = '12' THEN DR_NO END) AS December
       FROM CrimeIncident
       WHERE LAT BETWEEN :lat_min AND :lat_max
-        AND LON BETWEEN :lon_min AND :lon_max
-        AND TO_CHAR(Date_Rptd, 'YYYY') = :year`,
-      { lat_min, lat_max, lon_min, lon_max, year }
+        AND LON BETWEEN :lon_min AND :lon_max`,
+      { lat_min, lat_max, lon_min, lon_max }
     );
 
     // Send the result as JSON (single row with 12 columns for months)

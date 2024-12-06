@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styles from "@src/pages/introduce/introduce.module.scss";
 import { Link } from "react-router-dom";
 
 const Introduce = () => {
+    useEffect(() => {
+        sessionStorage.setItem("year", (2020).toString());
+    }, []);
     return (
         <div className={styles.wrapper}>
             <div className={styles.content}>

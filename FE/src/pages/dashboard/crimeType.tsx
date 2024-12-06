@@ -14,75 +14,6 @@ const CrimeType = ({ coordinate }: { coordinate: { lat: number; lng: number } })
 
     let skeleton = isFetching ? styles.skeleton : "";
 
-    let renderSkeleton = isFetching && (
-        <Fragment>
-            <div className={styles.row}>
-                <p className={skeleton}>231:</p>
-                <p className={skeleton}>Assault</p>
-            </div>
-            <div className={styles.row}>
-                <p className={skeleton}>231:</p>
-                <p className={skeleton}>Assault</p>
-            </div>
-            <div className={styles.row}>
-                <p className={skeleton}>231:</p>
-                <p className={skeleton}>Assault</p>
-            </div>
-            <div className={styles.row}>
-                <p className={skeleton}>231:</p>
-                <p className={skeleton}>Assault</p>
-            </div>
-            <div className={styles.row}>
-                <p className={skeleton}>231:</p>
-                <p className={skeleton}>Assault</p>
-            </div>
-            <div className={styles.row}>
-                <p className={skeleton}>231:</p>
-                <p className={skeleton}>Assault</p>
-            </div>
-            <div className={styles.row}>
-                <p className={skeleton}>231:</p>
-                <p className={skeleton}>Assault</p>
-            </div>
-            <div className={styles.row}>
-                <p className={skeleton}>231:</p>
-                <p className={skeleton}>Assault</p>
-            </div>
-            <div className={styles.row}>
-                <p className={skeleton}>231:</p>
-                <p className={skeleton}>Assault</p>
-            </div>
-        </Fragment>
-    );
-
-    let renderData = !isFetching && (
-        <Fragment>
-            <div className={styles.row}>
-                <p>111:</p>
-                <p>Grand Theft Auto</p>
-            </div>
-            <div className={styles.row}>
-                <p>231:</p>
-                <p>Assault</p>
-            </div>
-            <div className={styles.row}>
-                <p>321:</p>
-                <p>Robbery</p>
-            </div>
-            <div className={styles.row}>
-                <p>542:</p>
-                <p>Fraud</p>
-            </div>
-            <div className={styles.row}>
-                <p>572:</p>
-                <p>Trespassing</p>
-            </div>
-            <div className={styles.row}>
-                <p>742:</p>
-                <p>Public Disturbance</p>
-            </div>
-        </Fragment>
-    );
     return (
         <div className={styles.crimeTypeTitle}>
             <h1>Crime type</h1>
@@ -91,13 +22,6 @@ const CrimeType = ({ coordinate }: { coordinate: { lat: number; lng: number } })
                     <div className={`${styles.chart} ${skeleton}`}>
                         <CrimeTypeBar />
                     </div>
-                    <div className={styles.explainCode}>
-                        {renderSkeleton}
-                        {renderData}
-                    </div>
-                </div>
-                <div className={`${styles.rightChart} ${skeleton}`}>
-                    <CrimeTypePie />
                 </div>
             </div>
         </div>

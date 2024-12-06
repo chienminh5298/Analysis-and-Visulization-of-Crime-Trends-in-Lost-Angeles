@@ -22,7 +22,7 @@ const detailCrime = () => {
                                     <div className={styles.description}>
                                         <p>
                                             {" "}
-                                            The incident occurred on <strong>Monday, February 3rd, 2024</strong>, at <strong>12:30 AM</strong> in the <strong>West Palm Beach</strong> city area. The suspect, using a <strong>knife</strong>, committed the crime during the early hours. The case is currently classified as <strong>under investigation</strong>, with authorities actively seeking information and reviewing evidence to identify and apprehend the suspect.{" "}
+                                            The incident occurred on <strong>Monday, February 3rd, 2024</strong>, at <strong>12:30 AM</strong> with authorities actively seeking information and reviewing evidence to identify and apprehend the suspect.{" "}
                                         </p>
                                     </div>
                                     <div className={styles.crimeType}>
@@ -63,12 +63,7 @@ const detailCrime = () => {
                                     <img src={maleAvatar} alt="avatar" />
                                 </div>
                                 <div className={styles.info}>
-                                    <div className={styles.crimeCode}>
-                                        <p>
-                                            Crime code: <strong>24213</strong>
-                                        </p>
-                                        <FontAwesomeIcon icon={faIdCard} className={styles.icon} />
-                                    </div>
+                                    
                                     <div className={styles.row}>
                                         <p>
                                             Age: <strong>23</strong>
@@ -87,20 +82,7 @@ const detailCrime = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className={styles.caseStatus}>
-                            <div className={styles.header}>
-                                <h1>Case Status</h1>
-                                <FontAwesomeIcon icon={faCircleCheck} className={styles.icon} />
-                            </div>
-                            <div className={styles.body}>
-                                <div className={styles.statusCode}>
-                                    <h1>IG</h1>
-                                </div>
-                                <div className={styles.status}>
-                                    <h2>Investigate</h2>
-                                </div>
-                            </div>
-                        </div>
+                        
                     </div>
                 </div>
                 <div className={styles.row2}>
@@ -122,18 +104,13 @@ const detailCrime = () => {
                                         <img src={location} alt="Location" />
                                     </div>
                                 </div>
-                                <div className={styles.crimeLocationWrapper}>
-                                    <h2>Crime Location</h2>
-                                    <p>West Palm Beach County</p>
-                                </div>
+
                             </div>
                             <div className={styles.bottomSide}>
                                 <h3>WEAPON CODE</h3>
                                 <div className={styles.codeWrapper}>
                                     <h1>255</h1>
-                                    <div className={styles.codeIcon}>
-                                        <FontAwesomeIcon icon={faGun} className={styles.icon} />
-                                    </div>
+          
                                 </div>
                                 <h1 className={styles.isWeaponUsed}>WEAPON USED</h1>
                             </div>

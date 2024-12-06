@@ -13,17 +13,17 @@ import CrimeType from "./crimeType";
 import CrimeList from "./crimeList";
 
 const INITIAL_CENTER = { lat: 34.052235, lng: -118.243683 };
-const verifyInput = (lat: string, lng: string): boolean => {
-    const latNum = parseFloat(lat);
-    const lngNum = parseFloat(lng);
-
-    // Check if lat and lng are numbers and within valid ranges
-    if (isNaN(latNum) || isNaN(lngNum)) return false;
-
-    const isValidLatitude = latNum >= -90 && latNum <= 90;
-    const isValidLongitude = lngNum >= -180 && lngNum <= 180;
-
-    return isValidLatitude && isValidLongitude;
+const verifyInput = (year: string): boolean => {
+    try {
+        const yr = parseInt(year);
+        if (yr < 2020 || yr > 2024) {
+            return false;
+        } else {
+            return true;
+        }
+    } catch {
+        return false;
+    }
 };
 
 const Dashboard = () => {
@@ -137,17 +137,13 @@ const Dashboard = () => {
     const submitCoordinate = (e: any) => {
         e.preventDefault();
         const location = e.target;
-        const lat = parseFloat(location[0].value); // Convert to number
-        const lng = parseFloat(location[1].value); // Convert to number
+        const year = parseFloat(location[0].value); // Convert to number
 
         // Verify if the inputs are valid coordinates
-        if (verifyInput(location[0].value, location[1].value)) {
-            setCenter({
-                lat, // Pass the numeric value
-                lng, // Pass the numeric value
-            });
+        if (verifyInput(year)) {
+            sessionStorage.setItem("year", year.toString());
         } else {
-            alert("Please enter valid coordinates.");
+            alert("Please enter valid year between 2020 to 2024.");
         }
     };
 
@@ -165,13 +161,12 @@ const Dashboard = () => {
                     <div className={styles.top}>
                         <form className={styles.searchByCoordinates} onSubmit={submitCoordinate}>
                             <div className={styles.inputWrapper}>
-                                <input id="lat" type="text" name="lat" placeholder="Latitue" />
-                                <input id="lon" type="text" name="lon" placeholder="Longtitue" />
+                                <input id="year" type="text" name="lat" placeholder="Year 2020 - 2024" />
                             </div>
                             <div className={styles.search}>
                                 <button type="submit">
                                     <FontAwesomeIcon icon={faSearch} className={styles.icon} />
-                                    Locate
+                                    Submit
                                 </button>
                             </div>
                         </form>
