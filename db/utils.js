@@ -25,4 +25,21 @@ async function executeQuery(query, params = []) {
   }
 }
 
-module.exports = executeQuery;
+/**
+ * Calculate latitude and longitude range for a given center point and offset.
+ * @param {number} lat - The central latitude.
+ * @param {number} lon - The central longitude.
+ * @param {number} latOffset - The range offset for latitude.
+ * @param {number} lonOffset - The range offset for longitude.
+ * @returns {Object} - An object containing min/max values for latitude and longitude.
+ */
+function LatLonRange(lat, lon, latOffset = 0.362, lonOffset = 0.458) {
+  return {
+    lat_min: lat - latOffset,
+    lat_max: lat + latOffset,
+    lon_min: lon - lonOffset,
+    lon_max: lon + lonOffset,
+  };
+}
+
+module.exports = { executeQuery, LatLonRange };
