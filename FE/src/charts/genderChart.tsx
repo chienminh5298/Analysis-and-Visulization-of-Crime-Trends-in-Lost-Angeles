@@ -1,7 +1,22 @@
 import React from "react";
-import { Legend, Line, LineChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import styles from "@src/pages/dashboard/dashboard.module.scss";
+import { useQuery } from "@tanstack/react-query";
+import { fetchAge, fetchGender } from "../http";
 
-const OverviewRadar = () => {
+const GenderChart = ({ coordinate }: { coordinate: { lat: number; lng: number } }) => {
+    const {
+        data: dataQuery,
+        isFetching,
+        isError,
+    } = useQuery({
+        queryKey: ["genderChart", coordinate],
+        queryFn: () => fetchGender(coordinate.lat, coordinate.lng),
+        staleTime: 300000,
+    });
+
+    let skeleton = isFetching ? styles.skeleton : "";
+
     const data = [
         {
             month: "January",
@@ -76,28 +91,21 @@ const OverviewRadar = () => {
             x: 360,
         },
     ];
-    
 
     return (
-        <ResponsiveContainer width="100%" height={250}>
+        <ResponsiveContainer width="100%" height={250} className={skeleton}>
             <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <XAxis dataKey="month" />
-                {/* <YAxis /> */}
+                <XAxis dataKey="month" stroke="#FFFFFF" />
+                <YAxis stroke="#FFFFFF" />
+                <CartesianGrid strokeDasharray="3 3" />
                 <Tooltip />
                 <Legend />
                 <Line type="monotone" dataKey="male" stroke="#8884d8" />
-                <Line type="monotone" dataKey="female" stroke="#8884d8" />
+                <Line type="monotone" dataKey="female" stroke="#2384d8" />
                 <Line type="monotone" dataKey="x" stroke="#81ca2d" />
             </LineChart>
-            {/* <RadarChart outerRadius={90} data={data}>
-                <PolarGrid />
-                <PolarAngleAxis dataKey="subject" />
-                <Radar name="Male" dataKey="male" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-                <Radar name="Female" dataKey="female" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6} />
-                <Legend />
-            </RadarChart> */}
         </ResponsiveContainer>
     );
 };
 
-export default OverviewRadar;
+export default GenderChart;
