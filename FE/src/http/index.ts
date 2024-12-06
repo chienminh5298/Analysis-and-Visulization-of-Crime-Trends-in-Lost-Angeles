@@ -1,7 +1,8 @@
 import axiosService from "../axiosService";
+import { BACKEND_URL } from "../setting";
 
 export const fetchOverviewRadar = async (lat: number, lng: number) => {
-    const response = await axiosService.get(`/overviewRadar?lat=${lat}&lng=${lng}`);
+    const response = await axiosService.get(`${BACKEND_URL}/crime-count?lat=${lat}&lng=${lng}`);
     return response.data;
 
     //** Data expect */
@@ -35,7 +36,7 @@ export const fetchOverviewRadar = async (lat: number, lng: number) => {
 };
 
 export const fetchCaseNumberTrend = async (lat: number, lng: number) => {
-    const response = await axiosService.get(`/caseNumberTrend?lat=${lat}&lng=${lng}`);
+    const response = await axiosService.get(`${BACKEND_URL}/caseNumberTrend?lat=${lat}&lng=${lng}`);
     return response.data;
 
     const data = [
@@ -71,7 +72,7 @@ export const fetchCaseNumberTrend = async (lat: number, lng: number) => {
 };
 
 export const fetchCrimeType = async (lat: number, lng: number) => {
-    const response = await axiosService.get(`/crimeType?lat=${lat}&lng=${lng}`);
+    const response = await axiosService.get(`${BACKEND_URL}/crimeType?lat=${lat}&lng=${lng}`);
     return response.data;
 
     //** Data expect */
@@ -90,7 +91,7 @@ export const fetchCrimeType = async (lat: number, lng: number) => {
 };
 
 export const fetchCrimeList = async (lat: number, lng: number) => {
-    const response = await axiosService.get(`/crimeList?lat=${lat}&lng=${lng}`);
+    const response = await axiosService.get(`${BACKEND_URL}/crimeList?lat=${lat}&lng=${lng}`);
     return response.data;
 
     //** Data expect */
@@ -111,7 +112,7 @@ export const fetchCrimeList = async (lat: number, lng: number) => {
 };
 
 export const fetchCrimeDetail = async (caseId:number) => {
-    const response = await axiosService.get(`/crimeDetail?caseId=${caseId}`);
+    const response = await axiosService.get(`${BACKEND_URL}/crimeDetail?caseId=${caseId}`);
     return response.data
 
     //** Data expect */
