@@ -202,7 +202,6 @@ router.get('/byGender', async (req, res) => {
 });
 
 // Fetch count of victims descent for each month at {LAT} and {LON} in the year {YEAR}
-// { "month": "01", "descent_group": "Asian/Pacific Islander", "count": 20 }
 router.get('/byRace', async (req, res) => {
   const { lat, lon, year } = req.query; // Extract latitude, longitude, and year from query parameters
 
@@ -295,8 +294,7 @@ router.get('/byRace', async (req, res) => {
   }
 });
 
-// Fetch weapons at {LAT} and {LON}
-// [0] = January and [11] = December
+// Fetch weapons at {LAT} and {LON} in the year {YEAR}
 router.get('/byWeapon', async (req, res) => {
   const { lat, lon, year } = req.query; // Extract latitude, longitude, and year from query parameters
 
@@ -357,5 +355,43 @@ router.get('/byWeapon', async (req, res) => {
     });
   }
 });
+
+// Fetch DR_NO at {LAT} and {LON} in the year {YEAR}
+router.get('/crimeList', async (req, res) => {
+  const { lat, lon, year } = req.query; // Extract latitude, longitude, and year from query parameters
+
+  // Validate inputs
+  if (!lat || !lon || !year) {
+    return res.status(400).json({ message: 'Latitude, longitude, and year are required' });
+  }
+
+  try {
+    const { lat_min, lat_max, lon_min, lon_max } = LatLonRange(Number(lat), Number(lon));
+
+    const result = await executeQuery(
+      `SELECT 
+        DR_NO
+      FROM CrimeIncident
+      WHERE LAT BETWEEN :lat_min AND :lat_max
+        AND LON BETWEEN :lon_min AND :lon_max
+        AND TO_CHAR(Date_Rptd, 'YYYY') = :year`,
+      { lat_min, lat_max, lon_min, lon_max, year }
+    );
+
+    // Send the query result as JSON
+    res.json({
+      data: result.rows,
+    });
+
+  } catch (error) {
+    console.error('Error fetching weapon data:', error);
+    res.status(500).json({
+      message: 'Failed to fetch weapon data',
+      error: error.message,
+    });
+  }
+});
+
+
 
 module.exports = router;
