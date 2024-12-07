@@ -242,7 +242,6 @@
                             flex-direction: column;
                             flex: 1;
                             padding: 10px;
-                            border-right: var(--clg-1) solid 1px;
                             .latLon {
                                 .row {
                                     display: flex;
@@ -289,6 +288,10 @@
                                 flex: 1;
                                 margin: unset;
                                 font-size: 3vw;
+                            }
+                            h3 {
+                                flex: 1;
+                                margin: unset;
                             }
                             .codeIcon {
                                 flex: 1;
@@ -340,7 +343,7 @@
                             }
                         }
                     }
-                    .body{
+                    .body {
                         margin-top: 5px;
                         border-radius: 10px;
                         overflow: hidden;

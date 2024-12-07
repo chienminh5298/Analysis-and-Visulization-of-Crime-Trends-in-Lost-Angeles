@@ -78,7 +78,6 @@ router.get('/caseNumberTrend', async (req, res) => {
 // Fetch count of victims age for each month at {LAT} and {LON} in the year {YEAR}
 router.get('/byAge', async (req, res) => {
   const { lat, lon, year } = req.query; // Extract latitude and longitude from query parameters
-
   // Validate
   if (!lat || !lon || !year) {
     return res.status(400).json({ message: 'Latitude, longitude, and year are required' });

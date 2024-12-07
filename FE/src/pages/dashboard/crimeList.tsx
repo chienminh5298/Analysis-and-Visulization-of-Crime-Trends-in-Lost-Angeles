@@ -11,6 +11,8 @@ const CrimeList = ({ coordinate }: { coordinate: { lat: number; lng: number } })
         staleTime: 300000,
     });
 
+    console.log(data)
+
     let skeleton = isFetching ? styles.skeleton : "";
 
     const renderSkeleton = isFetching && (
