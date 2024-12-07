@@ -6,9 +6,9 @@ const getYear = () => {
     return parseInt(year);
 };
 
-export const fetchGender = async (lat: number, lng: number) => {
+export const fetchGender = async (lat: number, lon: number) => {
     const year = getYear();
-    const response = await axiosService.get(`${BACKEND_URL}/byGender?lat=${lat}&lng=${lng}&year=${year}`);
+    const response = await axiosService.get(`${BACKEND_URL}/byGender?lat=${lat}&lon=${lon}&year=${year}`);
     return response.data;
 
     //** Data expect */
@@ -88,9 +88,9 @@ export const fetchGender = async (lat: number, lng: number) => {
     ];
 };
 
-export const fetchAge = async (lat: number, lng: number) => {
+export const fetchAge = async (lat: number, lon: number) => {
     const year = getYear();
-    const response = await axiosService.get(`${BACKEND_URL}/byAge?lat=${lat}&lng=${lng}&year=${year}`);
+    const response = await axiosService.get(`${BACKEND_URL}/byAge?lat=${lat}&lon=${lon}&year=${year}`);
     return response.data;
 
     //** Data expect */
@@ -110,9 +110,9 @@ export const fetchAge = async (lat: number, lng: number) => {
     ];
 };
 
-export const fetchWeapon = async (lat: number, lng: number) => {
+export const fetchWeapon = async (lat: number, lon: number) => {
     const year = getYear();
-    const response = await axiosService.get(`${BACKEND_URL}/byWeapon?lat=${lat}&lng=${lng}&year=${year}`);
+    const response = await axiosService.get(`${BACKEND_URL}/byWeapon?lat=${lat}&lon=${lon}&year=${year}`);
     return response.data;
 
     //** Data expect */
@@ -135,9 +135,9 @@ export const fetchWeapon = async (lat: number, lng: number) => {
     ];
 };
 
-export const fetchCaseNumberTrend = async (lat: number, lng: number) => {
+export const fetchCaseNumberTrend = async (lat: number, lon: number) => {
     const year = getYear();
-    const response = await axiosService.get(`${BACKEND_URL}/caseNumberTrend?lat=${lat}&lng=${lng}&year=${year}`);
+    const response = await axiosService.get(`${BACKEND_URL}/caseNumberTrend?lat=${lat}&lon=${lon}&year=${year}`);
     return response.data;
 
     const data = [
@@ -172,9 +172,9 @@ export const fetchCaseNumberTrend = async (lat: number, lng: number) => {
     ];
 };
 
-export const fetchRace = async (lat: number, lng: number) => {
+export const fetchRace = async (lat: number, lon: number) => {
     const year = getYear();
-    const response = await axiosService.get(`${BACKEND_URL}/byRace?lat=${lat}&lng=${lng}&year=${year}`);
+    const response = await axiosService.get(`${BACKEND_URL}/byRace?lat=${lat}&lon=${lon}&year=${year}`);
     return response.data;
 
     //** Data expect */
@@ -290,9 +290,9 @@ export const fetchRace = async (lat: number, lng: number) => {
     ];
 };
 
-export const fetchCrimeList = async (lat: number, lng: number) => {
+export const fetchCrimeList = async (lat: number, lon: number) => {
     const year = getYear();
-    const response = await axiosService.get(`${BACKEND_URL}/crimeList?lat=${lat}&lng=${lng}&year=${year}`);
+    const response = await axiosService.get(`${BACKEND_URL}/crimeList?lat=${lat}&lon=${lon}&year=${year}`);
     return response.data;
 
     //** Data expect */

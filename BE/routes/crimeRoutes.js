@@ -31,7 +31,6 @@ router.get('/caseNumberTrend', async (req, res) => {
   try {
     const { lat_min, lat_max, lon_min, lon_max } = LatLonRange(Number(lat), Number(lon));
 
-    // Execute the query
     const result = await executeQuery(
       `SELECT 
         COUNT(CASE WHEN TO_CHAR(Date_Rptd, 'MM') = '01' THEN DR_NO END) AS January,
@@ -53,9 +52,9 @@ router.get('/caseNumberTrend', async (req, res) => {
       { lat_min, lat_max, lon_min, lon_max, year }
     );
 
-    // Combine metadata and rows to form the desired structure
+    // Reformat
     const columns = result.metaData.map(meta => meta.name); // Get column names
-    const values = result.rows[0]; // Get the first row of values
+    const values = result.rows[0]; 
 
     const data = columns.map((month, index) => ({
       month,
@@ -110,9 +109,9 @@ router.get('/byAge', async (req, res) => {
       { lat_min, lat_max, lon_min, lon_max, year }
     );
 
-    // Restructure output
+    // Reformat
     const columns = result.metaData.map(meta => meta.name); // Get column names
-    const values = result.rows[0]; // Get the first row of values
+    const values = result.rows[0];
 
     const data = columns.map((month, index) => ({
       month,
@@ -321,6 +320,7 @@ router.get('/byWeapon', async (req, res) => {
       { lat_min, lat_max, lon_min, lon_max, year }
     );
 
+    // Process the raw data
     const rawData = result.rows;
 
     // Initialize array with default values for all months
@@ -334,7 +334,6 @@ router.get('/byWeapon', async (req, res) => {
       noWeapon: 0,
     }));
 
-    // Process the raw data
     rawData.forEach(([month, weapons_count, no_weapons_count]) => {
       const monthIndex = parseInt(month, 10) - 1; // Convert '01' -> index 0
       if (monthIndex >= 0 && monthIndex < 12) {
@@ -378,20 +377,99 @@ router.get('/crimeList', async (req, res) => {
       { lat_min, lat_max, lon_min, lon_max, year }
     );
 
+    let finalResult = [];
+    for (const row of result.rows) {
+      finalResult.push(row[0]);
+    }
+
     // Send the query result as JSON
     res.json({
-      data: result.rows,
+      data: finalResult,
     });
 
   } catch (error) {
-    console.error('Error fetching weapon data:', error);
+    console.error('Error fetching crime report data:', error);
     res.status(500).json({
-      message: 'Failed to fetch weapon data',
+      message: 'Failed to fetch crime report data',
       error: error.message,
     });
   }
 });
 
+// Fetch all details from {caseId}
+router.get('/crimeDetail', async (req, res) => {
+  const { caseId } = req.query; // caseId from query parameters
 
+  // Validate inputs
+  if (!caseId) {
+    return res.status(400).json({ message: 'Case ID required' });
+  }
+
+  try {
+    const result = await executeQuery(
+      `SELECT 
+        ci.DR_NO AS caseId,
+        ci.DATE_OCC AS happenedDate,
+        ci.TIME_OCC AS happenedTime,
+        v.Vict_Sex AS gender,
+        v.Vict_Age AS age,
+        v.Vict_Descent AS nation,
+        ci.LAT AS happenedLat,
+        ci.LON AS happenedLon,
+        w.Weapon_Used_Cd AS weaponCode
+      FROM CrimeIncident ci
+      JOIN Victim v ON v.DR_NO = ci.DR_NO
+      JOIN Incident_Weapon w ON w.DR_NO = ci.DR_NO
+      WHERE ci.DR_NO = :caseId`,
+      { caseId }
+    );
+    
+    // Process raw data
+    const rawData = result.rows;
+    const dataByCrime = [];
+
+    rawData.forEach(row => {
+      const [caseId, happenedDate, happenedTime, gender, age, nation, happenedLat, happenedLon, weaponCode] = row;
+      
+      // Enter full values
+      const genderValue = 
+        gender === 'F' ? 'Female' : 
+        gender === 'M' ? 'Male' : 
+        'Other';
+      const nationValue = 
+        nation === 'B' ? 'Black' :
+        nation === 'H' ? 'Hispanic/Latin/Mexican' :
+        nation === 'I' ? 'American Indian/Alaskan Native' :
+        nation === 'W' ? 'White' :
+        nation === 'A' || 'C' || 'D' || 'F' || 'G' || 'J' || 'K' || 'L' || 'P' || 'S' || 'U' || 'V' || 'Z' ? 'Asian/Pacific Islander' :
+        'Other';
+      const timeValue = happenedTime.slice(0, 2) + ":" + happenedTime.slice(2);
+      
+      dataByCrime.push({
+        caseId,
+        happenedDate,
+        happenedTime: timeValue,
+        gender: genderValue,
+        age,
+        nation: nationValue,
+        happenedLat,
+        happenedLon,
+        weaponCode,
+      });
+    });
+
+    // Send the query result as JSON
+    res.json({
+      data: dataByCrime,
+    });
+
+  } catch (error) {
+    console.error('Error fetching crime detail data:', error);
+    res.status(500).json({
+      message: 'Failed to fetch crime detail data',
+      error: error.message,
+    });
+  }
+});
 
 module.exports = router;
