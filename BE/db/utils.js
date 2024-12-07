@@ -25,15 +25,28 @@ async function executeQuery(query, params = []) {
   }
 }
 
+// updated LatLonRange function to dynamically handle the 5-mile radius
+
 /**
- * Calculate latitude and longitude range for a given center point and offset.
+ * Convert miles to latitude and longitude offsets.
+ * @param {number} radius - Radius in miles.
+ * @returns {Object} - Offsets for latitude and longitude.
+ */
+function getOffsets(radius) {
+  const latOffset = (radius / 69) * 0.5; // 1 lat = 69 mi, halved for offset
+  const lonOffset = (radius / 57.31) * 0.5; // 1 lon = 57.31 mi @ lat ~34.055, halved for offset
+  return { latOffset, lonOffset };
+}
+
+/**
+ * Calculate latitude and longitude range for a given center point and radius.
  * @param {number} lat - The central latitude.
  * @param {number} lon - The central longitude.
- * @param {number} latOffset - The range offset for latitude.
- * @param {number} lonOffset - The range offset for longitude.
+ * @param {number} radius - Radius in miles.
  * @returns {Object} - An object containing min/max values for latitude and longitude.
  */
-function LatLonRange(lat, lon, latOffset = 0.362, lonOffset = 0.458) {
+function LatLonRange(lat, lon, radius = 50) {
+  const { latOffset, lonOffset } = getOffsets(radius);
   return {
     lat_min: lat - latOffset,
     lat_max: lat + latOffset,

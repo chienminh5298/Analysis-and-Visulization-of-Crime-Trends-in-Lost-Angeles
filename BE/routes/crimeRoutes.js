@@ -372,7 +372,8 @@ router.get('/crimeList', async (req, res) => {
       FROM CrimeIncident
       WHERE LAT BETWEEN :lat_min AND :lat_max
         AND LON BETWEEN :lon_min AND :lon_max
-        AND TO_CHAR(Date_Rptd, 'YYYY') = :year`,
+        AND TO_CHAR(Date_Rptd, 'YYYY') = :year
+      FETCH FIRST 50 ROWS ONLY`,
       { lat_min, lat_max, lon_min, lon_max, year }
     );
 
@@ -466,6 +467,61 @@ router.get('/crimeDetail', async (req, res) => {
     console.error('Error fetching crime detail data:', error);
     res.status(500).json({
       message: 'Failed to fetch crime detail data',
+      error: error.message,
+    });
+  }
+});
+
+router.post("/calculate-average-cases", async (req, res) => {
+  const locations = req.body.locations; // Expect an array of locations with lat, lon properties
+
+  if (!Array.isArray(locations)) {
+    return res
+      .status(400)
+      .json({ message: "Invalid data format. Array of locations required." });
+  }
+
+  try {
+    // Process each location
+    const updatedLocations = await Promise.all(
+      locations.map(async (location) => {
+        const { lat, lon } = location;
+
+        // Calculate latitude and longitude range for a 5-mile radius
+        const { lat_min, lat_max, lon_min, lon_max } = LatLonRange(
+          Number(lat),
+          Number(lon),
+          5
+        );
+
+        // Query to count crime cases within the range
+        const result = await executeQuery(
+          `SELECT COUNT(*) AS case_count
+           FROM CrimeIncident
+           WHERE LAT BETWEEN :lat_min AND :lat_max
+             AND LON BETWEEN :lon_min AND :lon_max`,
+          { lat_min, lat_max, lon_min, lon_max }
+        );
+
+        const averageCases = result.rows[0]?.CASE_COUNT || 0;
+
+        // Add the calculated average to the 'mag' field
+        return {
+          ...location,
+          properties: { ...location.properties, mag: averageCases },
+        };
+      })
+    );
+
+    // Respond with updated locations
+    res.json({
+      message: "Average cases calculated successfully!",
+      data: updatedLocations,
+    });
+  } catch (error) {
+    console.error("Error calculating average cases:", error);
+    res.status(500).json({
+      message: "Failed to calculate average cases",
       error: error.message,
     });
   }
