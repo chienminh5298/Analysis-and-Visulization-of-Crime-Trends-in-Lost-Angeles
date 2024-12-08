@@ -32,51 +32,9 @@ const verifyInput = (year: string): boolean => {
 };
 
 const Dashboard = () => {
-    const year = getYear()
-    const { data: dataQuery, isFetching } = useQuery({
-        queryKey: ["heatmap", year],
-        queryFn: () => fetchHeatmap(),
-        staleTime: 300000,
-    });
-
-    console.log(dataQuery)
     const [center, setCenter] = useState(INITIAL_CENTER);
     const [imediatelyCenter, setImediatelyCenter] = useState(INITIAL_CENTER);
-    const crimeData: FeatureCollection<Point, GeoJsonProperties> = {
-        type: "FeatureCollection",
-        features: [
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.243683, 34.052235] }, properties: { mag: 3.0 } }, // Downtown LA
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.281693, 34.020161] }, properties: { mag: 2.5 } }, // West Adams
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.395233, 33.994881] }, properties: { mag: 4.0 } }, // Marina Del Rey
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.328661, 34.092809] }, properties: { mag: 2.0 } }, // Hollywood
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.406837, 34.069339] }, properties: { mag: 1.8 } }, // Bel Air
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.256775, 34.040713] }, properties: { mag: 3.8 } }, // Arts District
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.289098, 34.029542] }, properties: { mag: 2.9 } }, // University Park
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.451357, 34.068921] }, properties: { mag: 3.5 } }, // UCLA
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.472736, 34.009242] }, properties: { mag: 2.7 } }, // Santa Monica Pier
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.248403, 34.056218] }, properties: { mag: 3.2 } }, // Walt Disney Concert Hall
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.340628, 34.100157] }, properties: { mag: 4.0 } }, // Griffith Observatory
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.337654, 34.134115] }, properties: { mag: 3.1 } }, // LA Zoo
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.296046, 34.181717] }, properties: { mag: 3.6 } }, // Burbank Airport
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.466472, 33.985047] }, properties: { mag: 3.8 } }, // Venice Beach
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.451357, 34.066687] }, properties: { mag: 4.2 } }, // Getty Center
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.288418, 34.067458] }, properties: { mag: 2.4 } }, // Koreatown
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.272537, 34.063536] }, properties: { mag: 3.0 } }, // Echo Park
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.284512, 34.118434] }, properties: { mag: 3.7 } }, // Los Feliz
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.44312, 34.052362] }, properties: { mag: 4.5 } }, // Westwood Village
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.25375, 34.064073] }, properties: { mag: 3.1 } }, // Chinatown
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.377243, 34.07092] }, properties: { mag: 2.9 } }, // Century City
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.333237, 34.069227] }, properties: { mag: 2.8 } }, // Beverly Grove
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.352039, 34.052339] }, properties: { mag: 3.4 } }, // Mid-Wilshire
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.321548, 34.066577] }, properties: { mag: 3.5 } }, // Fairfax
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.452057, 34.03698] }, properties: { mag: 4.1 } }, // Palms
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.487198, 33.970452] }, properties: { mag: 3.3 } }, // Playa Del Rey
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.429227, 34.031678] }, properties: { mag: 2.6 } }, // Culver City
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.256558, 34.048672] }, properties: { mag: 3.8 } }, // Little Tokyo
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.281735, 34.072086] }, properties: { mag: 3.0 } }, // MacArthur Park
-            { type: "Feature", geometry: { type: "Point", coordinates: [-118.250394, 34.042849] }, properties: { mag: 3.6 } }, // Fashion District
-        ],
-    };
+
     const [chartSelection, setChartSelection] = useState("age");
 
     function debounce(func: any, timeout = 3000) {
@@ -148,9 +106,7 @@ const Dashboard = () => {
         <div className={styles.wrapper}>
             <div className={styles.mapWrapper}>
                 <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
-                    <Map style={{ width: "100vw", height: "100vh" }} defaultCenter={center} defaultZoom={12} gestureHandling={"greedy"} disableDefaultUI={true} onBoundsChanged={(map) => onBoundsChanged(map)}>
-                        <Heatmap geojson={crimeData} radius={20} opacity={0.6} />
-                    </Map>
+                    <Map style={{ width: "100vw", height: "100vh" }} defaultCenter={center} defaultZoom={12} gestureHandling={"greedy"} disableDefaultUI={true} onBoundsChanged={(map) => onBoundsChanged(map)}></Map>
                 </APIProvider>
             </div>
             <div className={styles.content}>

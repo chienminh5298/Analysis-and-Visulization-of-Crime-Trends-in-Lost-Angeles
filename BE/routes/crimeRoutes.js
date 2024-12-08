@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { executeQuery}  = require('../db/utils');
 const { LatLonRange } = require('../db/utils');
-const { LAlocations } = require('../LAlocations');
 
 // Test database connection
 router.get('/test-connection', async (req, res) => {
