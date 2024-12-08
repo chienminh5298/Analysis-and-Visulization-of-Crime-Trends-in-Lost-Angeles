@@ -11,8 +11,6 @@ const CrimeList = ({ coordinate }: { coordinate: { lat: number; lng: number } })
         staleTime: 300000,
     });
 
-    console.log(data)
-
     let skeleton = isFetching ? styles.skeleton : "";
 
     const renderSkeleton = isFetching && (
@@ -43,39 +41,20 @@ const CrimeList = ({ coordinate }: { coordinate: { lat: number; lng: number } })
             </div>
         </Fragment>
     );
+
+    let renderData =
+        !isFetching && data
+            ? data.data.map((id: string) => {
+                  return <CrimeDetail reportId={id} />;
+              })
+            : renderSkeleton;
     return (
         <div className={styles.crimeList}>
             <div className={styles.background}></div>
             <div className={styles.title}>
                 <h1>Crime list</h1>
             </div>
-            <div className={styles.body}>
-                {isFetching && renderSkeleton}
-                {!isFetching && (
-                    <Fragment>
-                        <CrimeDetail />
-                        <CrimeDetail />
-                        <CrimeDetail />
-                        <CrimeDetail />
-                        <CrimeDetail />
-                        <CrimeDetail />
-                        <CrimeDetail />
-                        <CrimeDetail />
-                        <CrimeDetail />
-                        <CrimeDetail />
-                        <CrimeDetail />
-                        <CrimeDetail />
-                        <CrimeDetail />
-                        <CrimeDetail />
-                        <CrimeDetail />
-                        <CrimeDetail />
-                        <CrimeDetail />
-                        <CrimeDetail />
-                        <CrimeDetail />
-                        <CrimeDetail />
-                    </Fragment>
-                )}
-            </div>
+            <div className={styles.body}>{renderData}</div>
         </div>
     );
 };

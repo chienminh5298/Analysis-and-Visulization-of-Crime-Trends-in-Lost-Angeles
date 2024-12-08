@@ -8,15 +8,14 @@ import lineChart from "@src/asset/linechart.png";
 
 import Heatmap from "./heatmap";
 import { FeatureCollection, Point, GeoJsonProperties } from "geojson";
-import Overview from "./overview";
 import CaseNumberTrend from "./caseNumberTrend";
-import CrimeType from "./crimeType";
 import CrimeList from "./crimeList";
 import AgeChart from "@src/charts/ageChart";
 import GenderChart from "@src/charts/genderChart";
 import WeaponChart from "@src/charts/weaponChart";
 import RaceChart from "@src/charts/raceChart";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { fetchHeatmap, getYear } from "@src/http";
 
 const INITIAL_CENTER = { lat: 34.052235, lng: -118.243683 };
 const verifyInput = (year: string): boolean => {
@@ -33,6 +32,14 @@ const verifyInput = (year: string): boolean => {
 };
 
 const Dashboard = () => {
+    const year = getYear()
+    const { data: dataQuery, isFetching } = useQuery({
+        queryKey: ["heatmap", year],
+        queryFn: () => fetchHeatmap(),
+        staleTime: 300000,
+    });
+
+    console.log(dataQuery)
     const [center, setCenter] = useState(INITIAL_CENTER);
     const [imediatelyCenter, setImediatelyCenter] = useState(INITIAL_CENTER);
     const crimeData: FeatureCollection<Point, GeoJsonProperties> = {

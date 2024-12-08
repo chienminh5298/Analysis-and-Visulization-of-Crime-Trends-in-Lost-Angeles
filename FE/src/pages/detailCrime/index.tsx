@@ -8,6 +8,7 @@ import { APIProvider, Map, Marker } from "@vis.gl/react-google-maps";
 import { GOOGLE_MAPS_API_KEY } from "@src/setting";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCrimeDetail } from "@src/http";
+import { useLocation } from "react-router-dom";
 
 function formatDate(dateString: string) {
     const date = new Date(dateString);
@@ -39,10 +40,14 @@ function formatDate(dateString: string) {
 const formattedDate = formatDate("2020-05-20T04:00:00.000Z");
 console.log(formattedDate); // Output: "Wednesday, 20th May 2020"
 
-const detailCrime = (reportId: string) => {
+const detailCrime = () => {
+    const { search } = useLocation();
+    const queryParams = new URLSearchParams(search);
+    const reportId = queryParams.get("reportId");
+
     const { data: dataQuery, isFetching } = useQuery({
         queryKey: ["crimeDetail", reportId],
-        queryFn: () => fetchCrimeDetail("221607028"),
+        queryFn: () => fetchCrimeDetail(reportId),
         staleTime: 300000,
     });
 

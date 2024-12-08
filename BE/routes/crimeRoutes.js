@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { executeQuery}  = require('../db/utils');
 const { LatLonRange } = require('../db/utils');
+const { LAlocations } = require('../LAlocations');
 
 // Test database connection
 router.get('/test-connection', async (req, res) => {
@@ -472,9 +473,9 @@ router.get('/crimeDetail', async (req, res) => {
   }
 });
 
-router.post("/calculate-average-cases", async (req, res) => {
-  const locations = req.body.locations; // Expect an array of locations with lat, lon properties
-
+router.get("/heatmap", async (req, res) => {
+  const locations = LAlocations; // Expect an array of locations with lat, lon properties
+  console.log('first')
   if (!Array.isArray(locations)) {
     return res
       .status(400)

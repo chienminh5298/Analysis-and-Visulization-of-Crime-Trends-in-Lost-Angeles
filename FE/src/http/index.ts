@@ -1,7 +1,7 @@
 import axiosService from "../axiosService";
 import { BACKEND_URL } from "../setting";
 
-const getYear = () => {
+export const getYear = () => {
     let year = sessionStorage.getItem("year");
     return parseInt(year);
 };
@@ -44,5 +44,12 @@ export const fetchCrimeList = async (lat: number, lon: number) => {
 
 export const fetchCrimeDetail = async (caseId: string) => {
     const response = await axiosService.get(`${BACKEND_URL}/crimeDetail?caseId=${caseId}`);
+    return response.data;
+};
+
+
+export const fetchHeatmap = async () => {
+    const year = getYear()
+    const response = await axiosService.get(`${BACKEND_URL}/heatmap?year=${year}`);
     return response.data;
 };

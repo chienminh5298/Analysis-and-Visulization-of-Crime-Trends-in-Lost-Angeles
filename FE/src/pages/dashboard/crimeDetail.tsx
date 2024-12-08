@@ -1,12 +1,16 @@
 import React from "react";
 import styles from "@src/pages/dashboard/dashboard.module.scss";
+import { useNavigate } from "react-router-dom";
 
-const CrimeDetail = () => {
+const CrimeDetail = ({ reportId }: { reportId: string }) => {
+    const navigate = useNavigate();
+
+    const handleNavigate = () => {
+        navigate(`/detailCrime?reportId=${reportId}`);
+    };
     return (
-        <div className={styles.crimeDetail}>
-            <div className={styles.code}>500</div>
-            <div className={styles.describe}>THEFT OF IDENTITY</div>
-            <div className={styles.status}>AO</div>
+        <div className={styles.crimeDetail} onClick={handleNavigate}>
+            <div className={styles.describe}>{reportId}</div>
         </div>
     );
 };
